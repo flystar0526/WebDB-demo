@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+
+  <body class="container-fluid">
+    <div id="app">
+      <h1>Welcome to WebDB</h1>
+
+      <label>ID:</label>
+      <input type="text" v-model="id" />
+      <label>Name:</label>
+      <input type="text" v-model="name" />
+      <label>Profession:</label>
+      <input type="text" v-model="profession" />
+      <button @click="update(id)">Update</button>
+      <button @click="insert()">Add</button>
+      <button @click="selectOne(id)">Search</button>
+
+      <!-- TODO 2: revise the code below -->
+      <table class="table" style="width: 100%">
+        <th>Id</th>
+        <th>Name</th>
+        <th>Profession</th>
+        <th>button</th>
+        <tr v-for="result in results">
+          <td>{{result.id}}</td>
+          <td>{{result.name}}</td>
+          <td>{{result.profession}}</td>
+          <td>
+            <button @click="deleteRow(result.id)">delete</button>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          id: "",
+          name: "",
+          profession: "",
+          balance: 0,
+          results: null,
+          // TODO 1: replace the url
+          url: "http://localhost:7777/user", //spring boot
+        };
+      },
+      methods: {
+        selectAll: async function () {
+          const result = await axios.get(this.url);
+          this.results = result.data;
+        },
+
+        selectOne: async function (pk) {
+          const url = pk === "" ? this.url : this.url + "/" + pk;
+          const result = await axios.get(url);
+          this.results = result.data;
+        },
+
+        insert: async function () {
+          await axios({
+            method: "post",
+            url: this.url,
+            data: {
+              id: this.id,
+              name: this.name,
+              profession: this.profession,
+            },
+          });
+          this.selectAll();
+        },
+
+        deleteRow: async function (pk) {
+          // TODO 3: Implement the delete function
+          const url = pk === "" ? this.url : this.url + "/" + pk;
+          const result = await axios.delete(url);
+          this.selectAll();
+        },
+
+        update: async function (pk) {
+          // TODO 4: Implement the update function
+          await axios({
+            method: "put",
+            url: this.url,
+            data: {
+              id: this.id,
+              name: this.name,
+              profession: this.profession,
+            },
+          });
+          this.selectAll();
+        },
+      },
+      mounted() {
+        this.selectAll();
+      },
+    }).mount("#app");
+  </script>
+</html>
